@@ -13,5 +13,6 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(conf)
-
+	per := conf.GetPeriodicLogTags()
+	fmt.Println(per)
 }

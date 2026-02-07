@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 )
 
+// WriteFileAtomic saves the file "path" using an atomic sequence: first it saves the "data" to a tempFile, then it updates the permissions
+// of the tempFile to "perm" and then it replaces the original file "path" with the tempFile. This is usefull for files that are core to the app
+// and can't risk to be corrupted.
 func WriteFileAtomic(path string, data []byte, perm os.FileMode) error {
 	//I get the directory from the path
 	dir := filepath.Dir(path)

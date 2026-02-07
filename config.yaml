@@ -16,7 +16,7 @@ dataToLog:
     - name: "tag2"
       address: "DB3.DBX0.0"
       type: "bool"
-      periodicLog: true
+      periodicLog: false
       onChangeLog: true
       showDashboard: true
     - name: "tag3"
