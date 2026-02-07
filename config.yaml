@@ -4,6 +4,7 @@ connection:
   slot: 2
 app:
   periodicLogInterval: "24h"
+  onChangeClock: "30s"
   enableWebServer: true
   enableOnChangeLog: true 
 dataToLog:

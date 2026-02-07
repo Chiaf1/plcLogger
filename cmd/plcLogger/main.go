@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/chiaf1/plclogger/internal/config"
 )
@@ -12,7 +12,5 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(conf)
-	per := conf.GetPeriodicLogTags()
-	fmt.Println(per)
+	log.Println("Config loaded")
 }
