@@ -1,0 +1,29 @@
+connection:
+  ip: 192.168.0.0
+  port: 80
+  slot: 0
+app:
+  periodicLogInterval: intervalloDiTempo
+  enableWebServer: true
+  enableOnChangeLog: true 
+dataToLog:
+    - name: "tag1"
+      address: "DB3.DBX0.0"
+      type: "bool"
+      periodicLog: true
+      onChangeLog: true
+      showDashboard: true
+    - name: "tag2"
+      address: "DB3.DBX0.0"
+      type: "bool"
+      periodicLog: true
+      onChangeLog: true
+      showDashboard: true
+    - name: "tag3"
+      address: "DB3.DBX0.0"
+      type: "bool"
+      periodicLog: true
+      onChangeLog: true
+      showDashboard: true
+      
+
