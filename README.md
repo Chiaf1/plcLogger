@@ -24,5 +24,3 @@ Si potrebbe anche pensare di integrare della API REST per poter rendere accessib
     - *onChange.log*: il log dei valori da salvare on change, il file è nella struttura *NDJSON* ogni riga equivale ad un entry json con timestamp, nome, valroe vecchio e valore nuovo.
     - *periodic.log*: il log periodico, anche questo file è nella struttura *NDJSON*, ogni riga equivale ad un log periodico con un timestamp e tutte le tag con il loro valore.
 
-### Todo:
-    - [x] test

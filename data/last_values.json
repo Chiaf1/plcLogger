@@ -1,7 +1,7 @@
 {
-    "tag1": {"value": "", "timestamp": ""},
-    "tag2": {"value": "", "timestamp": ""},
-    "tag3": {"value": "", "timestamp": ""},
-    "tag4": {"value": "", "timestamp": ""},
-    "tag5": {"value": "", "timestamp": ""}
+    "tag1": {"value": "", "timestamp": null},
+    "tag2": {"value": "", "timestamp": null},
+    "tag3": {"value": "", "timestamp": null},
+    "tag4": {"value": "", "timestamp": null},
+    "tag5": {"value": "", "timestamp": null}
 }
