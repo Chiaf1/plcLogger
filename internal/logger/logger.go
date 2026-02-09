@@ -3,7 +3,7 @@ package logger
 import (
 	"reflect"
 
-	"github.com/chiaf1/plclogger/internal/datastorage"
+	datastorage "github.com/chiaf1/plclogger/internal/dataStorage"
 )
 
 type CurrentValues map[string]any
