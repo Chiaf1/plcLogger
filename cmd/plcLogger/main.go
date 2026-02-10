@@ -22,7 +22,6 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Last values loaded")
-	lvp := &lv
 
 	fmt.Println(lv)
 

@@ -19,13 +19,13 @@ func CheckChangedValues(lv datastorage.LastValues, cv CurrentValues, pathLv stri
 		//it checks if the key exist in the old values, if it doesn't it adds and logs it
 		if !exists {
 			LogOnChange(pathLog, k, nil, curVal)
-			lv.AddValue(k, curVal)
+			lv.SetValue(k, curVal)
 			changed = true
 			continue
 		}
 		if !reflect.DeepEqual(last.Val, curVal) {
 			LogOnChange(pathLog, k, last.Val, curVal)
-			lv.AddValue(k, curVal)
+			lv.SetValue(k, curVal)
 			changed = true
 		}
 	}

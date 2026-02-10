@@ -41,8 +41,8 @@ func (lv *LastValues) SaveLastValues(path string) error {
 	return utils.WriteFileAtomic(path, data, 0644)
 }
 
-// AddValue adds a value to the LastValues map. if it's already present it updates it
-func (lv *LastValues) AddValue(name string, val any) error {
+// SetValue sets or adds a value to the LastValues map. if present it updates it if not it creates it
+func (lv *LastValues) SetValue(name string, val any) error {
 	if name == "" {
 		return fmt.Errorf("Name must have a value")
 	}
@@ -51,6 +51,17 @@ func (lv *LastValues) AddValue(name string, val any) error {
 		*lv = make(LastValues)
 	}
 	ts := time.Now()
+
+	v, exists := (*lv)[name]
+	if exists {
+		//update value
+		v.Val = val
+		v.Ts = &ts
+		(*lv)[name] = v
+		return nil
+	}
+
+	// create new
 	(*lv)[name] = Vals{
 		Val: val,
 		Ts:  &ts,
