@@ -10,18 +10,22 @@ import (
 )
 
 type Config struct {
-	Connection struct {
-		Ip   string `yaml:"ip"`
-		Rack string `yaml:"rack"`
-		Slot string `yaml:"slot"`
-	} `yaml:"connection"`
-	App struct {
-		PeriodicLogInterval time.Duration `yaml:"periodicLogInterval"`
-		OnChangeClock       time.Duration `yaml:"onChangeClock"`
-		EnableWebServer     bool          `yaml:"enableWebServer"`
-		EnableOnChangeLog   bool          `yaml:"enableOnChangeLog"`
-	} `yaml:"app"`
-	DataToLog []Tag `yaml:"dataToLog"`
+	Connection ConnectionConfig `yaml:"connection"`
+	App        AppConfig        `yaml:"app"`
+	DataToLog  []Tag            `yaml:"dataToLog"`
+}
+
+type ConnectionConfig struct {
+	Ip   string `yaml:"ip"`
+	Rack string `yaml:"rack"`
+	Slot string `yaml:"slot"`
+}
+
+type AppConfig struct {
+	PeriodicLogInterval time.Duration `yaml:"periodicLogInterval"`
+	OnChangeClock       time.Duration `yaml:"onChangeClock"`
+	EnableWebServer     bool          `yaml:"enableWebServer"`
+	EnableOnChangeLog   bool          `yaml:"enableOnChangeLog"`
 }
 
 type Tag struct {
@@ -53,6 +57,7 @@ const (
 	PlcLongReal PlcType = "longReal"
 	PlcS5Time   PlcType = "s5time"
 	PlcTime     PlcType = "time"
+	PlcString   PlcType = "string"
 )
 
 // Load loads the values frrom the file "path" to the struct c, if the file is not present:
