@@ -41,7 +41,7 @@ func CheckChangedValues(lv datastorage.LastValues, cv CurrentValues, pathLv stri
 			changed = true
 			continue
 		}
-		if !reflect.DeepEqual(last.Val, curVal) {
+		if !SmartEqual(last.Val, curVal) {
 			LogOnChange(pathLog, k, last.Val, curVal)
 			lv.SetValue(k, curVal)
 			changed = true
@@ -93,4 +93,39 @@ func AppendToLogFile(path string, data []byte) error {
 		return fmt.Errorf("Error writing file: %w", err)
 	}
 	return nil
+}
+
+// ToFloat64 thsi function normalizez numeric values in float64. This can be usefull when comparing a numeric value read from a json
+// that are all normalized in float64 with a numeric value coming from a different part of the program that uses other types.
+// the function returns the float value and a bool to show if it was converter (true) or not (false)
+func ToFloat64(v any) (float64, bool) {
+	switch x := v.(type) {
+	case int, int8, int16, int32, int64:
+		return float64(reflect.ValueOf(x).Int()), true
+	case uint, uint8, uint16, uint32, uint64:
+		return float64(reflect.ValueOf(x).Uint()), true
+	case float32, float64:
+		return reflect.ValueOf(x).Float(), true
+	default:
+		return 0, false
+	}
+}
+
+// SmartEqual this function compares two values, if they are numric they get both normalized to float64 and compared
+// if they are not numeric they are compared with reflect.DeepEaqual
+func SmartEqual(a, b any) bool {
+	// normalize numeric values to float64
+	af, okA := ToFloat64(a)
+	bf, okB := ToFloat64(b)
+	// if the values are numeric confronts the normalized values
+	if okA && okB {
+		// here a tolleranze can be added for float values
+		// const eps = 1e-9
+		// return math.Abs(af-bf) < eps
+		return af == bf
+	}
+
+	// if the values are not numeric deep equal is called
+	return reflect.DeepEqual(a, b)
+
 }

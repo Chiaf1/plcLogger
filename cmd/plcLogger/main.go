@@ -5,12 +5,18 @@ import (
 
 	"github.com/chiaf1/plclogger/internal/config"
 	datastorage "github.com/chiaf1/plclogger/internal/dataStorage"
+	"github.com/chiaf1/plclogger/internal/logger"
+	plccomunication "github.com/chiaf1/plclogger/internal/plcComunication"
 )
+
+const CONFIG_PATH = "config.yaml"
+const LAST_VALUES_PATH = "./data/last_values.json"
+const ON_CHANGE_LOG_PATH = "./log/onChange.log"
 
 func main() {
 	//loading config
 	var conf config.Config
-	err := conf.Load("config.yaml")
+	err := conf.Load(CONFIG_PATH)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -18,13 +24,19 @@ func main() {
 
 	//loading last values
 	var lv datastorage.LastValues
-	err = lv.LoadLastValues("./data/last_values.json")
+	err = lv.LoadLastValues(LAST_VALUES_PATH)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println("Last values loaded")
 
-	//retreving the current values
-	// dataLogOnChange := conf.GetOnChangeLogTags()
+	//retreving the current values and checking if they changed
+	dataLogOnChange := conf.GetOnChangeLogTags()
+	curVal, err := plccomunication.UpdateCurrentVals(dataLogOnChange, conf.Connection)
+	if err != nil {
+		log.Fatal(err)
+	}
+	logger.CheckChangedValues(lv, curVal, LAST_VALUES_PATH, ON_CHANGE_LOG_PATH)
+	log.Println("OnChange logged")
 
 }
