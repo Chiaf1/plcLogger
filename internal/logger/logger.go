@@ -3,6 +3,7 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -128,4 +129,28 @@ func SmartEqual(a, b any) bool {
 	// if the values are not numeric deep equal is called
 	return reflect.DeepEqual(a, b)
 
+}
+
+// LogPeriodic this function logs the periodicLog values
+func LogPeriodic(cv CurrentValues, path string) error {
+	// getting the time stamp
+	ts := time.Now().Format(time.RFC3339)
+
+	// in order to have a "flat" json where the tags are all at the same level we need to put
+	// "." in front of ts in order to make it show always as first, otherwise it will move
+	// depending on the other tags names
+	flat := CurrentValues{
+		".ts": ts,
+	}
+
+	maps.Copy(flat, cv)
+
+	//creating the json package to log
+	data, err := json.Marshal(flat)
+	if err != nil {
+		return fmt.Errorf("Error parsing new values to JSON: %w", err)
+	}
+
+	//logging the values
+	return AppendToLogFile(path, append(data, '\n'))
 }

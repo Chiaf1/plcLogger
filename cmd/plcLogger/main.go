@@ -12,6 +12,7 @@ import (
 const CONFIG_PATH = "config.yaml"
 const LAST_VALUES_PATH = "./data/last_values.json"
 const ON_CHANGE_LOG_PATH = "./log/onChange.log"
+const PERIODIC_LOG_PATH = "./log/periodic.log"
 
 func main() {
 	//loading config
@@ -38,5 +39,8 @@ func main() {
 	}
 	logger.CheckChangedValues(lv, curVal, LAST_VALUES_PATH, ON_CHANGE_LOG_PATH)
 	log.Println("OnChange logged")
+
+	logger.LogPeriodic(curVal, PERIODIC_LOG_PATH)
+	log.Println("Periodic logged")
 
 }
