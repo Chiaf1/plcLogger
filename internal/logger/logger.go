@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	datastorage "github.com/chiaf1/plclogger/internal/dataStorage"
@@ -153,4 +156,111 @@ func LogPeriodic(cv CurrentValues, path string) error {
 
 	//logging the values
 	return AppendToLogFile(path, append(data, '\n'))
+}
+
+// RotateLogFileIfeNeeded this fuction checks the stats of the log file to see if exceeds certain values
+// if it does it then renames the file with a time stamp and moves it to a new directory
+func RotateLogFileIfNeeded(logFile string, maxSize int64, maxAge time.Duration, archiveDir string) error {
+	// retreving the file stats
+	info, err := os.Stat(logFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// if the file doesn't exist it doesn't need to be rotated
+			return nil
+		}
+		return fmt.Errorf("error reading log file info: %w", err)
+	}
+
+	needRotate := false
+
+	// check if size is too big
+	if info.Size() >= maxSize {
+		needRotate = true
+	}
+
+	// check if file too old
+	if maxAge > 0 {
+		age := time.Since(info.ModTime())
+		if age > maxAge {
+			needRotate = true
+		}
+	}
+
+	if !needRotate {
+		return nil
+	}
+
+	// first let's create the directory if it already exists nothing happens
+	if err := os.MkdirAll(archiveDir, 0755); err != nil {
+		return fmt.Errorf("cannot create directory: %w", err)
+	}
+
+	// new file name creation, format: baseName_date_time.ext
+	ext := filepath.Ext(logFile)
+	base := filepath.Base(logFile)
+	baseName := strings.TrimSuffix(base, ext)
+	ts := time.Now().Format("20060102_150405")
+	newFile := fmt.Sprintf("%s_%s%s", baseName, ts, ext)
+	newPath := filepath.Join(archiveDir, newFile)
+
+	// check if file already exists
+	if FileExists(newPath) {
+		incrementedName, err := IncrementFileName(newPath)
+		if err != nil {
+			return fmt.Errorf("error while searching for a new name: %w", err)
+		}
+		newPath = incrementedName
+	}
+	// renaming the file
+	err = os.Rename(logFile, newPath)
+	if err != nil {
+		return fmt.Errorf("error renaming the file: %w", err)
+	}
+
+	return nil
+}
+
+// FileExists checks if file already exists
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// the file doesn't exists
+			return false
+		}
+	}
+	// the file exists
+	return true
+}
+
+// IncrementFileName if the file name already exist this function ads a _n at the end
+func IncrementFileName(path string) (string, error) {
+	dir := filepath.Dir(path)
+	base := filepath.Base(path)
+	ext := filepath.Ext(base)
+	name := strings.TrimSuffix(base, ext)
+
+	var prefix string
+	var start int
+	re := regexp.MustCompile(`^(.*?)-(\d+)$`)
+	match := re.FindStringSubmatch(name)
+	if match == nil {
+		prefix = name
+		start = 1
+	} else {
+		prefix = match[1]
+		n, err := strconv.Atoi(match[2])
+		if err != nil {
+			return "", fmt.Errorf("error converting int to string: %w", err)
+		}
+		start = n + 1
+	}
+	for i := start; i < 999; i++ {
+		fileName := fmt.Sprintf("%s-%d", prefix, i)
+		candidate := filepath.Join(dir, fileName+ext)
+		if !FileExists(candidate) {
+			return candidate, nil
+		}
+	}
+	return "", fmt.Errorf("coudn't finde a free file name")
 }
