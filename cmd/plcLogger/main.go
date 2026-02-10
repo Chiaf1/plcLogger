@@ -22,7 +22,12 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Println("Last values loaded")
-
+	lv.SetValue("tag1", 123)
+	lv.SetValue("tag2", 123.456)
+	lv.SetValue("tag3", "Luigi")
+	lv.SetValue("tag4", true)
+	lv.SetValue("tag5", nil)
 	fmt.Println(lv)
+	lv.SaveLastValues("./data/last_values.json")
 
 }

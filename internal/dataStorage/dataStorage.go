@@ -12,8 +12,8 @@ import (
 type LastValues map[string]Vals
 
 type Vals struct {
-	Val any        `json:"value"`
-	Ts  *time.Time `json:"timestamp"`
+	Val any    `json:"value"`
+	Ts  string `json:"timestamp"`
 }
 
 // LoadLastValues laods the last values from file
@@ -34,7 +34,7 @@ func (lv *LastValues) LoadLastValues(path string) error {
 
 // SaveLastValues saves the last values to the "path" using the WriteFileAtomic function
 func (lv *LastValues) SaveLastValues(path string) error {
-	data, err := json.Marshal(lv)
+	data, err := json.MarshalIndent(lv, "", "    ")
 	if err != nil {
 		return fmt.Errorf("Error while parsing to JSON: %w", err)
 	}
@@ -50,13 +50,13 @@ func (lv *LastValues) SetValue(name string, val any) error {
 	if *lv == nil {
 		*lv = make(LastValues)
 	}
-	ts := time.Now()
+	ts := time.Now().Format(time.RFC3339)
 
 	v, exists := (*lv)[name]
 	if exists {
 		//update value
 		v.Val = val
-		v.Ts = &ts
+		v.Ts = ts
 		(*lv)[name] = v
 		return nil
 	}
@@ -64,7 +64,7 @@ func (lv *LastValues) SetValue(name string, val any) error {
 	// create new
 	(*lv)[name] = Vals{
 		Val: val,
-		Ts:  &ts,
+		Ts:  ts,
 	}
 	return nil
 }
