@@ -9,7 +9,7 @@ import (
 	plccomunication "github.com/chiaf1/plclogger/internal/plcComunication"
 )
 
-const CONFIG_PATH = "config.yaml"
+const CONFIG_PATH = "./config.yaml"
 const LAST_VALUES_PATH = "./data/last_values.json"
 const ON_CHANGE_LOG_PATH = "./log/onChange.log"
 const PERIODIC_LOG_PATH = "./log/periodic.log"
