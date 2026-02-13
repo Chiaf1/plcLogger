@@ -264,3 +264,26 @@ func IncrementFileName(path string) (string, error) {
 	}
 	return "", fmt.Errorf("coudn't finde a free file name")
 }
+
+// GetArchiveSize returns the added dimension of all the items in a directory. Attention, the function is NOT recursive
+// so it only checks the first layer of the directory it will not count the dimensions of files inside other directories
+func GetArchiveSize(path string) (int64, error) {
+	var size int64
+	// read the content of a directory
+	files, err := os.ReadDir(path)
+	if err != nil {
+		return size, fmt.Errorf("error reading directory: %w", err)
+	}
+	// cycle trought the content of the directory
+	for _, f := range files {
+		// if it's not a directory then check the size and increment the total
+		if !f.IsDir() {
+			info, err := f.Info()
+			if err != nil {
+				return size, fmt.Errorf("error accessing the info of the file: %w", err)
+			}
+			size += info.Size()
+		}
+	}
+	return size, nil
+}
