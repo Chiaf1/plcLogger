@@ -9,7 +9,7 @@ app:
   enableOnChangeLog: true 
 dataToLog:
     - name: "tag1"
-      dbnumber: 0
+      db: 0
       start: 0
       bit: 0
       type: "int"
@@ -17,7 +17,7 @@ dataToLog:
       onChangeLog: true
       showDashboard: true
     - name: "tag2"
-      dbnumber: 2
+      db: 2
       start: 0
       bit: 0
       type: "real"
@@ -25,7 +25,7 @@ dataToLog:
       onChangeLog: true
       showDashboard: true
     - name: "tag3"
-      dbnumber: 3
+      db: 3
       start: 2
       bit: 0
       type: "string"
@@ -33,7 +33,7 @@ dataToLog:
       onChangeLog: true
       showDashboard: true
     - name: "tag4"
-      dbnumber: 4
+      db: 4
       start: 0
       bit: 0
       type: "bool"
@@ -41,7 +41,7 @@ dataToLog:
       onChangeLog: true
       showDashboard: true
     - name: "tag5"
-      dbnumber: 5
+      db: 5
       start: 0
       bit: 0
       type: "bool"
