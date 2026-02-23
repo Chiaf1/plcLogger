@@ -289,8 +289,8 @@ func GetArchiveSize(path string) (int64, error) {
 	return size, nil
 }
 
-// RemoveExcesArchive remove the oldest file until the archive size is under the limit
-func RemoveExcesArchive(path string, maxSize int64) error {
+// RemoveExcessArchive remove the oldest file until the archive size is under the limit
+func RemoveExcessArchive(path string, maxSize int64) error {
 	// the function loops untile the archive is under the max size
 	for {
 		// Get archive size
@@ -299,7 +299,7 @@ func RemoveExcesArchive(path string, maxSize int64) error {
 			return fmt.Errorf("error calculating the archive size: %w", err)
 		}
 		// If archive size already within limits, stop
-		if archiveSize < maxSize {
+		if archiveSize <= maxSize {
 			return nil
 		}
 
@@ -345,4 +345,22 @@ func RemoveExcesArchive(path string, maxSize int64) error {
 		}
 
 	}
+}
+
+// CheckArchiveRotation checks the log file size and rotates it if needed, then checks the size of the archive and removes old files
+// if the archive exceeds the set dimension
+func CheckArchiveRotation(logFile string, maxSize int64, maxAge time.Duration, archivePath string, maxArchiveSize int64) error {
+	// First checks if the log file needs to be rotated
+	err := RotateLogFileIfNeeded(logFile, maxSize, maxAge, archivePath)
+	if err != nil {
+		return fmt.Errorf("error rotating log file: %w", err)
+	}
+
+	// then checks the archive directory
+	err = RemoveExcessArchive(archivePath, maxArchiveSize)
+	if err != nil {
+		return fmt.Errorf("error removing excess archive files: %w", err)
+	}
+
+	return nil
 }
