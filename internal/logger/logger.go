@@ -3,6 +3,7 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"maps"
 	"os"
 	"path/filepath"
@@ -286,4 +287,62 @@ func GetArchiveSize(path string) (int64, error) {
 		}
 	}
 	return size, nil
+}
+
+// RemoveExcesArchive remove the oldest file until the archive size is under the limit
+func RemoveExcesArchive(path string, maxSize int64) error {
+	// the function loops untile the archive is under the max size
+	for {
+		// Get archive size
+		archiveSize, err := GetArchiveSize(path)
+		if err != nil {
+			return fmt.Errorf("error calculating the archive size: %w", err)
+		}
+		// If archive size already within limits, stop
+		if archiveSize < maxSize {
+			return nil
+		}
+
+		// Get directory content
+		entries, err := os.ReadDir(path)
+		if err != nil {
+			return fmt.Errorf("error reading the directory: %w", err)
+		}
+		// If directory empty exit the function no need to remove any file
+		if len(entries) == 0 {
+			return nil
+		}
+
+		// Find the oldest file
+		var oldest fs.FileInfo
+		for _, e := range entries {
+			// skip directorys
+			if e.IsDir() {
+				continue
+			}
+
+			info, err := e.Info()
+			if err != nil {
+				return fmt.Errorf("error accessign file info: %w", err)
+			}
+
+			if oldest == nil || info.ModTime().Before(oldest.ModTime()) {
+				oldest = info
+			}
+		}
+
+		// If no file found return
+		if oldest == nil {
+			return nil
+		}
+
+		// Build correct file path
+		toBeDeleted := filepath.Join(path, oldest.Name())
+
+		// Delete file
+		if err := os.Remove(toBeDeleted); err != nil {
+			return fmt.Errorf("error removing file %s: %w", toBeDeleted, err)
+		}
+
+	}
 }
