@@ -9,31 +9,41 @@ app:
   enableOnChangeLog: true 
 dataToLog:
     - name: "tag1"
-      address: "DB3.DBX0.0"
+      dbnumber: 0
+      start: 0
+      bit: 0
       type: "int"
       periodicLog: true
       onChangeLog: true
       showDashboard: true
     - name: "tag2"
-      address: "DB3.DBX0.0"
+      dbnumber: 2
+      start: 0
+      bit: 0
       type: "real"
       periodicLog: false
       onChangeLog: true
       showDashboard: true
     - name: "tag3"
-      address: "DB3.DBX0.0"
+      dbnumber: 3
+      start: 2
+      bit: 0
       type: "string"
       periodicLog: true
       onChangeLog: true
       showDashboard: true
     - name: "tag4"
-      address: "DB3.DBX0.0"
+      dbnumber: 4
+      start: 0
+      bit: 0
       type: "bool"
       periodicLog: true
       onChangeLog: true
       showDashboard: true
     - name: "tag5"
-      address: "DB3.DBX0.0"
+      dbnumber: 5
+      start: 0
+      bit: 0
       type: "bool"
       periodicLog: true
       onChangeLog: true

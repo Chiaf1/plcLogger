@@ -5,6 +5,14 @@ import (
 	"github.com/chiaf1/plclogger/internal/logger"
 )
 
+// PLC client interface with standard metods common to multiple protocols
+type PLCClient interface {
+	Connect() error
+	Disconnect() error
+	Read(tag config.PlcTag) (any, error)
+	CheckConnection() bool
+}
+
 // UpdateCurrentVals connectes to the plc, retrieves the current values of all the tags in the PlcTag slice (tags) and retturns
 // the current values that's a map with the kye value as the name of tag and the value as the value of the tag
 func UpdateCurrentVals(tags []config.PlcTag, conf config.ConnectionConfig) (logger.CurrentValues, error) {

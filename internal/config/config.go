@@ -36,9 +36,11 @@ type Tag struct {
 }
 
 type PlcTag struct {
-	Name    string  `yaml:"name"`
-	Address string  `yaml:"address"`
-	Type    PlcType `yaml:"type"`
+	Name     string  `yaml:"name"`
+	DBNumber int     `yaml:"db"`
+	Start    int     `yaml:"start"` // bytes offset inside the DB
+	Bit      int     `yaml:"bit"`   // used only for bool tags
+	Type     PlcType `yaml:"type"`
 }
 
 type PlcType string
@@ -93,9 +95,11 @@ func (c *Config) SetDefault() {
 	c.DataToLog = []Tag{
 		{
 			PlcTag: PlcTag{
-				Name:    "Tag1",
-				Address: "db0.dbx0.0",
-				Type:    PlcBool,
+				Name:     "Tag1",
+				DBNumber: 0,
+				Start:    0,
+				Bit:      0,
+				Type:     PlcBool,
 			},
 			PeriodicLog:   false,
 			OnChangeLog:   false,
@@ -115,8 +119,8 @@ func (c *Config) Save(path string) error {
 
 // AddDataToLogFields adds the data to log to config.DataToLog slice. This metod accepts single fields.
 // To use a Tag struct use the method AppendDataToLogTag()
-func (c *Config) AddDataToLogFields(name string, address string, tagType PlcType, periodicLog, onChangeLog, showDashboard bool) error {
-	if name == "" || address == "" || tagType == "" {
+func (c *Config) AddDataToLogFields(name string, dbNumber, start, bit int, tagType PlcType, periodicLog, onChangeLog, showDashboard bool) error {
+	if name == "" || tagType == "" {
 		return fmt.Errorf("missing tag values")
 	}
 	for _, tt := range c.DataToLog {
@@ -126,9 +130,11 @@ func (c *Config) AddDataToLogFields(name string, address string, tagType PlcType
 	}
 	var newTag = Tag{
 		PlcTag: PlcTag{
-			Name:    name,
-			Address: address,
-			Type:    tagType,
+			Name:     name,
+			DBNumber: dbNumber,
+			Start:    start,
+			Bit:      bit,
+			Type:     tagType,
 		},
 		PeriodicLog:   periodicLog,
 		OnChangeLog:   onChangeLog,
@@ -141,7 +147,7 @@ func (c *Config) AddDataToLogFields(name string, address string, tagType PlcType
 // AddDataToLogTag adds the data to log to config.DataToLog slice. This metod accepts a single Tag.
 // To use single fields use the method AddDataToLogFields()
 func (c *Config) AppendDataToLogTag(t Tag) error {
-	if t.Name == "" || t.Address == "" || t.Type == "" {
+	if t.Name == "" || t.Type == "" {
 		return fmt.Errorf("missing tag values")
 	}
 	for _, tt := range c.DataToLog {
@@ -202,7 +208,7 @@ func (c *Config) UpdateDataToLogTag(t Tag) error {
 	if t.Name == "" {
 		return fmt.Errorf("missing tag name")
 	}
-	if t.Address == "" || t.Type == "" {
+	if t.Type == "" {
 		return fmt.Errorf("tag %s is missing values", t.Name)
 	}
 	for i, tt := range c.DataToLog {
