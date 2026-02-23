@@ -26,9 +26,9 @@ Si potrebbe anche pensare di integrare della API REST per poter rendere accessib
 
 ## Cose da fare:
  - [x] Lettura configurazione da file e creazione file default se non esiste
- - [@] Lettura file ultimi valori per store degli utlimi valori salvati per il log sul cambio valore
- - [@] Creazione file di log: periodici e onChange
- - [@] Rotazione file di log se dimensione troppo grande e controllo dimensione archivio per mantenere dimensioni impostate
+ - [x] Lettura file ultimi valori per store degli utlimi valori salvati per il log sul cambio valore
+ - [x] Creazione file di log: periodici e onChange
+ - [X] Rotazione file di log se dimensione troppo grande e controllo dimensione archivio per mantenere dimensioni impostate
  - [ ] Lettura valori attivi da PLC {Protocollo S7 con GOS7 o OPCUA}
  - [ ] Creazione interfaccia web essenziale {framework GIN + GO templates + HTMX}
  - [ ] Integrazione gestion archivio file da interfaccia web con possibilità di scaricare i file e cancellarli
