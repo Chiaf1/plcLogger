@@ -25,7 +25,7 @@ Si potrebbe anche pensare di integrare della API REST per poter rendere accessib
     - *periodic.log*: il log periodico, anche questo file è nella struttura *NDJSON*, ogni riga equivale ad un log periodico con un timestamp e tutte le tag con il loro valore.
 
 ## Cose da fare:
- - [@] Lettura configurazione da file e creazione file default se non esiste
+ - [x] Lettura configurazione da file e creazione file default se non esiste
  - [@] Lettura file ultimi valori per store degli utlimi valori salvati per il log sul cambio valore
  - [@] Creazione file di log: periodici e onChange
  - [@] Rotazione file di log se dimensione troppo grande e controllo dimensione archivio per mantenere dimensioni impostate
