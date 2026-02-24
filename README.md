@@ -33,3 +33,20 @@ Si potrebbe anche pensare di integrare della API REST per poter rendere accessib
  - [ ] Creazione interfaccia web essenziale {framework GIN + GO templates + HTMX}
  - [ ] Integrazione gestion archivio file da interfaccia web con possibilità di scaricare i file e cancellarli
  - [ ] Integrazione API REST per recupero dati attivi e storico
+
+ ### Struttura UI
+ - Una pagina dashboard per vedere:
+    - lo stato di connessione del plc
+    - i valori show on dashboard
+- Una pagina per gestire la configurazione dell'app e la connessione con il plc
+- Una pagina per vedere la lista di tag da loggare con i flag in base al log che va fatto e la possibilità di aggiungere nuove tag da loggare
+- una pagina per leggere i log più recenti (una per i periodic e una per on change)
+- una pagina dove gestire i file di log archiviati
+    - poterli leggere
+    - poterli scaricare
+    - poterli cancellare
+- una pagina con lo stato del sistema
+    - carico cpu
+    - stato ram
+    - stato spazio di archiviazione
+    - log degli errori
