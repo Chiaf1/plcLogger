@@ -1,0 +1,52 @@
+package domain
+
+import "time"
+
+type ConnectionConfig struct {
+	Ip              string        `yaml:"ip"`
+	Rack            string        `yaml:"rack"`
+	Slot            string        `yaml:"slot"`
+	Protocol        string        `yaml:"protocol"`
+	Timeout         time.Duration `yaml:"timeout"`
+	ConnectionRetry int           `yaml:"connectionRetry"`
+}
+
+type AppConfig struct {
+	PeriodicLogInterval time.Duration `yaml:"periodicLogInterval"`
+	OnChangeClock       time.Duration `yaml:"onChangeClock"`
+	EnableWebServer     bool          `yaml:"enableWebServer"`
+	EnableOnChangeLog   bool          `yaml:"enableOnChangeLog"`
+}
+
+type Tag struct {
+	PlcTag        `yaml:",inline"`
+	PeriodicLog   bool `yaml:"periodicLog"`
+	OnChangeLog   bool `yaml:"onChangeLog"`
+	ShowDashboard bool `yaml:"showDashboard"`
+}
+
+type PlcTag struct {
+	Name  string       `yaml:"name"`
+	Type  PlcType      `yaml:"type"`
+	S7    S7Mapping    `yaml:"s7"`
+	OPCUA OPCUAMapping `yaml:"opca"`
+}
+
+type PlcType string
+
+const (
+	PlcBool     PlcType = "bool"
+	PlcByte     PlcType = "byte"
+	PlcUsint    PlcType = "usint"
+	PlcWord     PlcType = "word"
+	PlcInt      PlcType = "int"
+	PlcUint     PlcType = "uint"
+	PlcDWord    PlcType = "dword"
+	PlcDInt     PlcType = "dint"
+	PlcUDint    PlcType = "udint"
+	PlcReal     PlcType = "real"
+	PlcLongReal PlcType = "longReal"
+	PlcS5Time   PlcType = "s5time"
+	PlcTime     PlcType = "time"
+	PlcString   PlcType = "string"
+)

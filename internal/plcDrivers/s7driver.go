@@ -1,6 +1,7 @@
 package plcdrivers
 
 import (
+	"github.com/chiaf1/plclogger/internal/domain"
 	gos7 "github.com/robinson/gos7"
 )
 
@@ -14,15 +15,20 @@ type S7Client struct {
 	client  *gos7.Client
 }
 
-type S7Mapping struct {
-	DBNumber int `yaml:"dbNumber"`
-	Offset   int `yaml:"offset"` // bytes offset inside the DB
-	Bit      int `yaml:"bit"`    // used only for bool tags
-}
+// NewS7Client creates a new driver
+func NewS7Client() *S7Client
+
+// Connect opens the connection to the client
+func (s7 *S7Client) Connect() error
+
+// Disconnect closes the connection to the client
+func (s7 *S7Client) Disconnect() error
+
+// Read connects to the plc and reads the current value of the tag
+func (s7 *S7Client) Read(tag domain.PlcTag) (any, error)
 
 /*
-// NewS7Client creates the client but doesn't open the comunication
-func NewS7Client(ip string, rack, slot int) *S7Client {
 
-}
+	func (s7 *S7Client) Write(tag config.PlcTag) error
+	func (s7 *S7Client) Health() bool
 */

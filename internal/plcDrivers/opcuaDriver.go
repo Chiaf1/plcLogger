@@ -7,10 +7,6 @@ type OPCUAClient struct {
 	slot int
 }
 
-type OPCUAMapping struct {
-	Node string `yaml:"node"`
-}
-
 /*
 // NewS7Client creates the client but doesn't open the comunication
 func NewS7Client(ip string, rack, slot int) *S7Client {

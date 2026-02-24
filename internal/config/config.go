@@ -5,65 +5,16 @@ import (
 	"os"
 	"time"
 
-	plcdrivers "github.com/chiaf1/plclogger/internal/plcDrivers"
+	"github.com/chiaf1/plclogger/internal/domain"
 	"github.com/chiaf1/plclogger/internal/utils"
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Connection ConnectionConfig `yaml:"connection"`
-	App        AppConfig        `yaml:"app"`
-	DataToLog  []Tag            `yaml:"dataToLog"`
+	Connection domain.ConnectionConfig `yaml:"connection"`
+	App        domain.AppConfig        `yaml:"app"`
+	DataToLog  []domain.Tag            `yaml:"dataToLog"`
 }
-
-type ConnectionConfig struct {
-	Ip              string        `yaml:"ip"`
-	Rack            string        `yaml:"rack"`
-	Slot            string        `yaml:"slot"`
-	Protocol        string        `yaml:"protocol"`
-	Timeout         time.Duration `yaml:"timeout"`
-	ConnectionRetry int           `yaml:"connectionRetry"`
-}
-
-type AppConfig struct {
-	PeriodicLogInterval time.Duration `yaml:"periodicLogInterval"`
-	OnChangeClock       time.Duration `yaml:"onChangeClock"`
-	EnableWebServer     bool          `yaml:"enableWebServer"`
-	EnableOnChangeLog   bool          `yaml:"enableOnChangeLog"`
-}
-
-type Tag struct {
-	PlcTag        `yaml:",inline"`
-	PeriodicLog   bool `yaml:"periodicLog"`
-	OnChangeLog   bool `yaml:"onChangeLog"`
-	ShowDashboard bool `yaml:"showDashboard"`
-}
-
-type PlcTag struct {
-	Name  string                  `yaml:"name"`
-	Type  PlcType                 `yaml:"type"`
-	S7    plcdrivers.S7Mapping    `yaml:"s7"`
-	OPCUA plcdrivers.OPCUAMapping `yaml:"opca"`
-}
-
-type PlcType string
-
-const (
-	PlcBool     PlcType = "bool"
-	PlcByte     PlcType = "byte"
-	PlcUsint    PlcType = "usint"
-	PlcWord     PlcType = "word"
-	PlcInt      PlcType = "int"
-	PlcUint     PlcType = "uint"
-	PlcDWord    PlcType = "dword"
-	PlcDInt     PlcType = "dint"
-	PlcUDint    PlcType = "udint"
-	PlcReal     PlcType = "real"
-	PlcLongReal PlcType = "longReal"
-	PlcS5Time   PlcType = "s5time"
-	PlcTime     PlcType = "time"
-	PlcString   PlcType = "string"
-)
 
 // Load loads the values frrom the file "path" to the struct c, if the file is not present:
 // the default values are loaded and the file is created.
@@ -98,17 +49,17 @@ func (c *Config) SetDefault() {
 	c.App.EnableWebServer = true
 	c.App.EnableOnChangeLog = true
 
-	c.DataToLog = []Tag{
+	c.DataToLog = []domain.Tag{
 		{
-			PlcTag: PlcTag{
+			PlcTag: domain.PlcTag{
 				Name: "Tag1",
-				Type: PlcBool,
-				S7: plcdrivers.S7Mapping{
+				Type: domain.PlcBool,
+				S7: domain.S7Mapping{
 					DBNumber: 0,
 					Offset:   0,
 					Bit:      0,
 				},
-				OPCUA: plcdrivers.OPCUAMapping{
+				OPCUA: domain.OPCUAMapping{
 					Node: "",
 				},
 			},
@@ -130,7 +81,7 @@ func (c *Config) Save(path string) error {
 
 // AddDataToLogTag adds the data to log to config.DataToLog slice. This metod accepts a single Tag.
 // To use single fields use the method AddDataToLogFields()
-func (c *Config) AppendDataToLogTag(t Tag) error {
+func (c *Config) AppendDataToLogTag(t domain.Tag) error {
 	if t.Name == "" || t.Type == "" {
 		return fmt.Errorf("missing tag values")
 	}
@@ -144,8 +95,8 @@ func (c *Config) AppendDataToLogTag(t Tag) error {
 }
 
 // GetPeriodicLogTags returns a slice of PlcTags that have the flag PeriodicLog enabled
-func (c *Config) GetPeriodicLogTags() []PlcTag {
-	var LogTags []PlcTag
+func (c *Config) GetPeriodicLogTags() []domain.PlcTag {
+	var LogTags []domain.PlcTag
 	for _, t := range c.DataToLog {
 		if t.PeriodicLog {
 			LogTags = append(LogTags, t.PlcTag)
@@ -155,8 +106,8 @@ func (c *Config) GetPeriodicLogTags() []PlcTag {
 }
 
 // GetPeriodicLogTags returns a slice of PlcTags that have the flag OnChangeLog enabled
-func (c *Config) GetOnChangeLogTags() []PlcTag {
-	var LogTags []PlcTag
+func (c *Config) GetOnChangeLogTags() []domain.PlcTag {
+	var LogTags []domain.PlcTag
 	for _, t := range c.DataToLog {
 		if t.OnChangeLog {
 			LogTags = append(LogTags, t.PlcTag)
@@ -166,8 +117,8 @@ func (c *Config) GetOnChangeLogTags() []PlcTag {
 }
 
 // GetPeriodicLogTags returns a slice of PlcTags that have the flag ShowDashboard enabled
-func (c *Config) GetShowDashboardTags() []PlcTag {
-	var LogTags []PlcTag
+func (c *Config) GetShowDashboardTags() []domain.PlcTag {
+	var LogTags []domain.PlcTag
 	for _, t := range c.DataToLog {
 		if t.ShowDashboard {
 			LogTags = append(LogTags, t.PlcTag)
@@ -188,7 +139,7 @@ func (c *Config) RemoveDataToLog(name string) error {
 }
 
 // UpdateDataToLog updates the values of an existing tag
-func (c *Config) UpdateDataToLogTag(t Tag) error {
+func (c *Config) UpdateDataToLogTag(t domain.Tag) error {
 	if t.Name == "" {
 		return fmt.Errorf("missing tag name")
 	}
