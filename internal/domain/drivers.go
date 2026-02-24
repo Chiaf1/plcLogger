@@ -7,8 +7,8 @@ type PLCDriver interface {
 	Connect() error
 	Disconnect() error
 	Read(tag PlcTag) (any, error)
-	Write(tag PlcTag) error
-	Health() bool
+	//Write(tag PlcTag) error
+	//Health() bool
 }
 
 /*

@@ -50,3 +50,9 @@ Si potrebbe anche pensare di integrare della API REST per poter rendere accessib
     - stato ram
     - stato spazio di archiviazione
     - log degli errori
+
+### Optional da implementare nella connessione con PLC
+- tentativi di riconnessione nel caso si scolleghi durante la lettura
+- scrittura dei dati nel plc
+- lettura dei dati a batch dai db
+- lettura di dati al di fuori dei db
