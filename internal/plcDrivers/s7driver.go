@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/chiaf1/plclogger/internal/domain"
-	gos7 "github.com/robinson/gos7"
+	"github.com/robinson/gos7"
 )
 
 // struct that implements the iterface plcComunication/PLCClient
@@ -15,7 +15,7 @@ type S7Client struct {
 	slot int
 
 	handler *gos7.TCPClientHandler
-	client  *gos7.Client
+	client  gos7.Client
 }
 
 // NewS7Client creates a new driver
@@ -40,11 +40,10 @@ func NewS7Client(conf domain.ConnectionConfig) *S7Client {
 // Connect opens the connection to the client
 func (s7 *S7Client) Connect() error {
 	if err := s7.handler.Connect(); err != nil {
-		return fmt.Errorf("S7 connect failed (ip=%s rack=%s slot=%s): %w", s7.ip, s7.rack, s7.slot, err)
+		return fmt.Errorf("S7 connect failed (ip=%s rack=%v slot=%v): %w", s7.ip, s7.rack, s7.slot, err)
 	}
 	// after the connection let's create the client that will use this handler
-	c := gos7.NewClient(s7.handler)
-	s7.client = &c
+	s7.client = gos7.NewClient(s7.handler)
 	return nil
 }
 
@@ -54,14 +53,137 @@ func (s7 *S7Client) Disconnect() error {
 	if s7.handler != nil {
 		s7.handler.Close()
 	}
+	s7.client = nil
 	return nil
 }
 
 // Read connects to the plc and reads the current value of the tag
-func (s7 *S7Client) Read(tag domain.PlcTag) (any, error)
+func (s7 *S7Client) Read(tag domain.PlcTag) (any, error) {
+	if s7.client == nil {
+		return nil, fmt.Errorf("S7 client not connected")
+	}
+
+	// Calculate how many bytes are needed
+	sz, err := requiredSizeBytes(tag)
+	if err != nil {
+		return nil, err
+	}
+
+	buf := make([]byte, sz)
+
+	// Reading from DB
+	err = s7.client.AGReadDB(tag.S7.DBNumber, tag.S7.Offset, sz, buf)
+	if err != nil {
+		return nil, fmt.Errorf("error reading from (DB=%v offset=%v, size=%v): %w", tag.S7.DBNumber, tag.S7.Offset, sz, err)
+	}
+	v, err := parseValueFromBuffer(buf, 0, tag)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing the byte buffer: %w", err)
+	}
+	return v, nil
+}
+
+// Calculates how many bytes are needed for a given tag
+func requiredSizeBytes(tag domain.PlcTag) (int, error) {
+	switch tag.Type {
+	case domain.PlcBool:
+		return 1, nil
+	case domain.PlcByte, domain.PlcUsint:
+		return 1, nil
+	case domain.PlcWord:
+		return 2, nil
+	case domain.PlcInt:
+		return 2, nil
+	case domain.PlcUint:
+		return 2, nil
+	case domain.PlcDWord:
+		return 4, nil
+	case domain.PlcDInt:
+		return 4, nil
+	case domain.PlcUDint:
+		return 4, nil
+	case domain.PlcReal:
+		return 4, nil
+	case domain.PlcLongReal:
+		return 8, nil
+	case domain.PlcS5Time:
+		return 2, nil
+	case domain.PlcTime:
+		return 4, nil
+	case domain.PlcString:
+		return 255, nil
+	default:
+		return -1, fmt.Errorf("unsupported type: %s", tag.Type)
+	}
+}
+
+// parseValueFromBuffer parses the tag value from the read buffer
+func parseValueFromBuffer(buf []byte, startIndex int, tag domain.PlcTag) (any, error) {
+	if startIndex < 0 || startIndex >= len(buf) {
+		return nil, fmt.Errorf("StartIndex out of range: %d (len=%d)", startIndex, len(buf))
+	}
+	var h gos7.Helper
+	switch tag.Type {
+	case domain.PlcBool:
+		return h.GetBoolAt(buf[startIndex], uint(tag.S7.Bit)), nil
+	case domain.PlcByte, domain.PlcUsint:
+		return buf[startIndex], nil
+	case domain.PlcWord:
+		return getWordAt(buf, startIndex), nil
+	case domain.PlcInt:
+		return getIntAt(buf, startIndex), nil
+	case domain.PlcUint:
+		return getUintAt(buf, startIndex), nil
+	case domain.PlcDWord:
+		return getDwordAt(buf, startIndex), nil
+	case domain.PlcDInt:
+		return getDintAt(buf, startIndex), nil
+	case domain.PlcUDint:
+		return getUDintAt(buf, startIndex), nil
+	case domain.PlcReal:
+		return h.GetRealAt(buf, startIndex), nil
+	case domain.PlcLongReal:
+		return h.GetLRealAt(buf, startIndex), nil
+	case domain.PlcS5Time:
+		return h.GetS5TimeAt(buf, startIndex), nil
+	case domain.PlcTime:
+		return getDintAt(buf, startIndex), nil
+	case domain.PlcString:
+		return h.GetStringAt(buf, startIndex), nil
+	default:
+		return nil, fmt.Errorf("unsupported type: %s", tag.Type)
+	}
+}
+
+// helpers functions for converting byte buffers into values
+
+// returns the uint at index pos swapping the bytes
+func getUintAt(buf []byte, pos int) uint16 {
+	return uint16(buf[pos])<<8 | uint16(buf[pos+1])
+}
+
+// returns int at index pos swaping the bytes
+func getIntAt(buf []byte, pos int) int16 {
+	return int16(getUintAt(buf, pos))
+}
+
+func getWordAt(buf []byte, pos int) uint16 {
+	return getUintAt(buf, pos)
+}
+
+func getDwordAt(buf []byte, pos int) uint32 {
+	return uint32(buf[pos])<<24 | uint32(buf[pos+1])<<16 | uint32(buf[pos+2])<<8 | uint32(buf[pos+3])
+}
+
+func getUDintAt(buf []byte, pos int) uint32 {
+	return getDwordAt(buf, pos)
+}
+
+func getDintAt(buf []byte, pos int) int32 {
+	return int32(getDwordAt(buf, pos))
+}
 
 /*
-
 	func (s7 *S7Client) Write(tag config.PlcTag) error
 	func (s7 *S7Client) Health() bool
 */
