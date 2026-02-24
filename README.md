@@ -35,7 +35,7 @@ Si potrebbe anche pensare di integrare della API REST per poter rendere accessib
  - [ ] Integrazione API REST per recupero dati attivi e storico
 
  ### Struttura UI
- - Una pagina dashboard per vedere:
+- Una pagina dashboard per vedere:
     - lo stato di connessione del plc
     - i valori show on dashboard
 - Una pagina per gestire la configurazione dell'app e la connessione con il plc
