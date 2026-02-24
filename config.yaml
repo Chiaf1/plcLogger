@@ -2,6 +2,9 @@ connection:
   ip: 192.168.0.0
   rack: 0
   slot: 2
+  protocol: "s7"
+  timeout: "200ms"
+  connectionRetry: 3
 app:
   periodicLogInterval: "24h"
   onChangeClock: "30s"

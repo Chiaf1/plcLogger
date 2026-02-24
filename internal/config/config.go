@@ -16,9 +16,12 @@ type Config struct {
 }
 
 type ConnectionConfig struct {
-	Ip   string `yaml:"ip"`
-	Rack string `yaml:"rack"`
-	Slot string `yaml:"slot"`
+	Ip              string        `yaml:"ip"`
+	Rack            string        `yaml:"rack"`
+	Slot            string        `yaml:"slot"`
+	Protocol        string        `yaml:"protocol"`
+	Timeout         time.Duration `yaml:"timeout"`
+	ConnectionRetry int           `yaml:"connectionRetry"`
 }
 
 type AppConfig struct {
@@ -86,6 +89,9 @@ func (c *Config) SetDefault() {
 	c.Connection.Ip = "192.168.2.2"
 	c.Connection.Rack = "0"
 	c.Connection.Slot = "2"
+	c.Connection.Protocol = "s7"
+	c.Connection.Timeout = 200 * time.Millisecond
+	c.Connection.ConnectionRetry = 3
 
 	c.App.PeriodicLogInterval = 24 * time.Hour
 	c.App.PeriodicLogInterval = 30 * time.Second
