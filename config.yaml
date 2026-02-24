@@ -1,9 +1,9 @@
 connection:
-  ip: 192.168.0.0
-  rack: 0
-  slot: 2
-  protocol: "s7"
-  timeout: "200ms"
+  ip: 192.168.2.2
+  rack: "0"
+  slot: "2"
+  protocol: s7
+  timeout: 200ms
   connectionRetry: 3
 app:
   periodicLogInterval: "24h"
@@ -11,45 +11,14 @@ app:
   enableWebServer: true
   enableOnChangeLog: true 
 dataToLog:
-    - name: "tag1"
+  - name: Tag1
+    type: bool
+    s7:
       dbNumber: 0
       offset: 0
       bit: 0
-      type: "int"
-      periodicLog: true
-      onChangeLog: true
-      showDashboard: true
-    - name: "tag2"
-      dbNumber: 2
-      offset: 0
-      bit: 0
-      type: "real"
-      periodicLog: false
-      onChangeLog: true
-      showDashboard: true
-    - name: "tag3"
-      dbNumber: 3
-      offset: 2
-      bit: 0
-      type: "string"
-      periodicLog: true
-      onChangeLog: true
-      showDashboard: true
-    - name: "tag4"
-      dbNumber: 4
-      offset: 0
-      bit: 0
-      type: "bool"
-      periodicLog: true
-      onChangeLog: true
-      showDashboard: true
-    - name: "tag5"
-      dbNumber: 5
-      offset: 0
-      bit: 0
-      type: "bool"
-      periodicLog: true
-      onChangeLog: true
-      showDashboard: true
-      
-
+    opca:
+      node: ""
+    periodicLog: false
+    onChangeLog: false
+    showDashboard: false

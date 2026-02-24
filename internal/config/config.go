@@ -94,7 +94,7 @@ func (c *Config) SetDefault() {
 	c.Connection.ConnectionRetry = 3
 
 	c.App.PeriodicLogInterval = 24 * time.Hour
-	c.App.PeriodicLogInterval = 30 * time.Second
+	c.App.OnChangeClock = 30 * time.Second
 	c.App.EnableWebServer = true
 	c.App.EnableOnChangeLog = true
 
