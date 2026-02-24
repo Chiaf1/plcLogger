@@ -5,11 +5,12 @@ import (
 	"github.com/chiaf1/plclogger/internal/logger"
 )
 
-// PLC client interface with standard metods common to multiple protocols
-type PLCClient interface {
+// PLC driver interface with standard metods common to multiple protocols
+type PLCDriver interface {
 	Connect() error
 	Disconnect() error
 	Read(tag config.PlcTag) (any, error)
+	Write(tag config.PlcTag) error
 	CheckConnection() bool
 }
 

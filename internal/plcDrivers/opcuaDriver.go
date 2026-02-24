@@ -1,17 +1,14 @@
-package plccomunication
-
-import (
-	gos7 "github.com/robinson/gos7"
-)
+package plcdrivers
 
 // struct that implements the iterface plcComunication/PLCClient
-type S7Client struct {
+type OPCUAClient struct {
 	ip   string
 	rack int
 	slot int
+}
 
-	handler *gos7.TCPClientHandler
-	client  *gos7.Client
+type OPCUAMapping struct {
+	Node string `yaml:"node"`
 }
 
 /*

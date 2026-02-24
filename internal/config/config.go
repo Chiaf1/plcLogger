@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	plcdrivers "github.com/chiaf1/plclogger/internal/plcDrivers"
 	"github.com/chiaf1/plclogger/internal/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -39,11 +40,10 @@ type Tag struct {
 }
 
 type PlcTag struct {
-	Name     string  `yaml:"name"`
-	DBNumber int     `yaml:"db"`
-	Start    int     `yaml:"start"` // bytes offset inside the DB
-	Bit      int     `yaml:"bit"`   // used only for bool tags
-	Type     PlcType `yaml:"type"`
+	Name  string                  `yaml:"name"`
+	Type  PlcType                 `yaml:"type"`
+	S7    plcdrivers.S7Mapping    `yaml:"s7"`
+	OPCUA plcdrivers.OPCUAMapping `yaml:"opca"`
 }
 
 type PlcType string
@@ -101,11 +101,16 @@ func (c *Config) SetDefault() {
 	c.DataToLog = []Tag{
 		{
 			PlcTag: PlcTag{
-				Name:     "Tag1",
-				DBNumber: 0,
-				Start:    0,
-				Bit:      0,
-				Type:     PlcBool,
+				Name: "Tag1",
+				Type: PlcBool,
+				S7: plcdrivers.S7Mapping{
+					DBNumber: 0,
+					Offset:   0,
+					Bit:      0,
+				},
+				OPCUA: plcdrivers.OPCUAMapping{
+					Node: "",
+				},
 			},
 			PeriodicLog:   false,
 			OnChangeLog:   false,
@@ -121,33 +126,6 @@ func (c *Config) Save(path string) error {
 		return fmt.Errorf("Error while parsing to YAML: %w", err)
 	}
 	return utils.WriteFileAtomic(path, data, 0644)
-}
-
-// AddDataToLogFields adds the data to log to config.DataToLog slice. This metod accepts single fields.
-// To use a Tag struct use the method AppendDataToLogTag()
-func (c *Config) AddDataToLogFields(name string, dbNumber, start, bit int, tagType PlcType, periodicLog, onChangeLog, showDashboard bool) error {
-	if name == "" || tagType == "" {
-		return fmt.Errorf("missing tag values")
-	}
-	for _, tt := range c.DataToLog {
-		if tt.Name == name {
-			return fmt.Errorf("tag %s already exists", name)
-		}
-	}
-	var newTag = Tag{
-		PlcTag: PlcTag{
-			Name:     name,
-			DBNumber: dbNumber,
-			Start:    start,
-			Bit:      bit,
-			Type:     tagType,
-		},
-		PeriodicLog:   periodicLog,
-		OnChangeLog:   onChangeLog,
-		ShowDashboard: showDashboard,
-	}
-	c.DataToLog = append(c.DataToLog, newTag)
-	return nil
 }
 
 // AddDataToLogTag adds the data to log to config.DataToLog slice. This metod accepts a single Tag.

@@ -12,40 +12,40 @@ app:
   enableOnChangeLog: true 
 dataToLog:
     - name: "tag1"
-      db: 0
-      start: 0
+      dbNumber: 0
+      offset: 0
       bit: 0
       type: "int"
       periodicLog: true
       onChangeLog: true
       showDashboard: true
     - name: "tag2"
-      db: 2
-      start: 0
+      dbNumber: 2
+      offset: 0
       bit: 0
       type: "real"
       periodicLog: false
       onChangeLog: true
       showDashboard: true
     - name: "tag3"
-      db: 3
-      start: 2
+      dbNumber: 3
+      offset: 2
       bit: 0
       type: "string"
       periodicLog: true
       onChangeLog: true
       showDashboard: true
     - name: "tag4"
-      db: 4
-      start: 0
+      dbNumber: 4
+      offset: 0
       bit: 0
       type: "bool"
       periodicLog: true
       onChangeLog: true
       showDashboard: true
     - name: "tag5"
-      db: 5
-      start: 0
+      dbNumber: 5
+      offset: 0
       bit: 0
       type: "bool"
       periodicLog: true
