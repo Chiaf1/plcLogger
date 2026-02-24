@@ -1,6 +1,7 @@
 package plcdrivers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/chiaf1/plclogger/internal/domain"
@@ -37,10 +38,24 @@ func NewS7Client(conf domain.ConnectionConfig) *S7Client {
 }
 
 // Connect opens the connection to the client
-func (s7 *S7Client) Connect() error
+func (s7 *S7Client) Connect() error {
+	if err := s7.handler.Connect(); err != nil {
+		return fmt.Errorf("S7 connect failed (ip=%s rack=%s slot=%s): %w", s7.ip, s7.rack, s7.slot, err)
+	}
+	// after the connection let's create the client that will use this handler
+	c := gos7.NewClient(s7.handler)
+	s7.client = &c
+	return nil
+}
 
-// Disconnect closes the connection to the client
-func (s7 *S7Client) Disconnect() error
+// Disconnect closes the connection to the client, gos7 doesn't returns errors on closing
+// but to keep the interface it will return nil always
+func (s7 *S7Client) Disconnect() error {
+	if s7.handler != nil {
+		s7.handler.Close()
+	}
+	return nil
+}
 
 // Read connects to the plc and reads the current value of the tag
 func (s7 *S7Client) Read(tag domain.PlcTag) (any, error)
