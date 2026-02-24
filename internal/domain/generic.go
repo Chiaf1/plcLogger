@@ -1,16 +1,24 @@
 package domain
 
+/*
+The package Domain is used to store all types' definitions that are common to multiple packages
+
+This helps to avoid import loops inside the code
+*/
+
 import "time"
 
+// ConnectionConfig defines the configurations used to connect to the PLC
 type ConnectionConfig struct {
 	Ip              string        `yaml:"ip"`
-	Rack            string        `yaml:"rack"`
-	Slot            string        `yaml:"slot"`
+	Rack            int           `yaml:"rack"`
+	Slot            int           `yaml:"slot"`
 	Protocol        string        `yaml:"protocol"`
 	Timeout         time.Duration `yaml:"timeout"`
 	ConnectionRetry int           `yaml:"connectionRetry"`
 }
 
+// AppConfig stores the configurations of the app behavior
 type AppConfig struct {
 	PeriodicLogInterval time.Duration `yaml:"periodicLogInterval"`
 	OnChangeClock       time.Duration `yaml:"onChangeClock"`
@@ -18,6 +26,7 @@ type AppConfig struct {
 	EnableOnChangeLog   bool          `yaml:"enableOnChangeLog"`
 }
 
+// Tag defines all data related to one tag
 type Tag struct {
 	PlcTag        `yaml:",inline"`
 	PeriodicLog   bool `yaml:"periodicLog"`
@@ -25,6 +34,7 @@ type Tag struct {
 	ShowDashboard bool `yaml:"showDashboard"`
 }
 
+// PlcTag defines the tag data strictly related to the plc
 type PlcTag struct {
 	Name  string       `yaml:"name"`
 	Type  PlcType      `yaml:"type"`
@@ -32,6 +42,7 @@ type PlcTag struct {
 	OPCUA OPCUAMapping `yaml:"opca"`
 }
 
+// This enum represents the data types that can be read from the PLC
 type PlcType string
 
 const (

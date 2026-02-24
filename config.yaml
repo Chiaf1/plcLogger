@@ -1,13 +1,13 @@
 connection:
   ip: 192.168.2.2
-  rack: "0"
-  slot: "2"
+  rack: 0
+  slot: 2
   protocol: s7
-  timeout: 200ms
+  timeout: 3s
   connectionRetry: 3
 app:
-  periodicLogInterval: "24h"
-  onChangeClock: "30s"
+  periodicLogInterval: 24h
+  onChangeClock: 30s
   enableWebServer: true
   enableOnChangeLog: true 
 dataToLog:

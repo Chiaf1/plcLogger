@@ -38,10 +38,10 @@ func (c *Config) Load(path string) error {
 // SetDefault sets the config default values
 func (c *Config) SetDefault() {
 	c.Connection.Ip = "192.168.2.2"
-	c.Connection.Rack = "0"
-	c.Connection.Slot = "2"
+	c.Connection.Rack = 0
+	c.Connection.Slot = 2
 	c.Connection.Protocol = "s7"
-	c.Connection.Timeout = 200 * time.Millisecond
+	c.Connection.Timeout = 3 * time.Second
 	c.Connection.ConnectionRetry = 3
 
 	c.App.PeriodicLogInterval = 24 * time.Hour
