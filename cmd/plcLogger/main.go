@@ -33,7 +33,7 @@ func main() {
 
 	//retreving the current values and checking if they changed
 	dataLogOnChange := conf.GetOnChangeLogTags()
-	curVal, err := plccomunication.UpdateCurrentVals(dataLogOnChange, conf.Connection)
+	curVal, err := plccomunication.UpdateCurrentVals(conf.DataToLog, conf.Connection)
 	if err != nil {
 		log.Fatal(err)
 	}
