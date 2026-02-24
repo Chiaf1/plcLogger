@@ -32,15 +32,15 @@ func main() {
 	log.Println("Last values loaded")
 
 	//retreving the current values and checking if they changed
-	dataLogOnChange := conf.GetOnChangeLogTags()
-	curVal, err := plccomunication.UpdateCurrentVals(conf.DataToLog, conf.Connection)
+	var rv plccomunication.ReadValues
+	err = rv.UpdateCurrentVals(conf.DataToLog, conf.Connection)
 	if err != nil {
 		log.Fatal(err)
 	}
-	logger.CheckChangedValues(lv, curVal, LAST_VALUES_PATH, ON_CHANGE_LOG_PATH)
+	logger.CheckChangedValues(lv, rv.GetOnChange(), LAST_VALUES_PATH, ON_CHANGE_LOG_PATH)
 	log.Println("OnChange logged")
 
-	logger.LogPeriodic(curVal, PERIODIC_LOG_PATH)
+	logger.LogPeriodic(rv.GetPeriodic(), PERIODIC_LOG_PATH)
 	log.Println("Periodic logged")
 
 }
