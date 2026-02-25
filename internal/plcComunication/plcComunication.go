@@ -1,6 +1,7 @@
 package plccomunication
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"maps"
@@ -15,6 +16,10 @@ import (
 type ReadValues struct {
 	mu   sync.RWMutex
 	tags map[string]*Value
+
+	pollerMu   sync.RWMutex
+	polling    bool
+	cancelPoll context.CancelFunc
 }
 
 // Value type that raperesent one tag with the flags PeriodicLog, OnChangeLog, ShowDashboard to rapresent the log they belong to
