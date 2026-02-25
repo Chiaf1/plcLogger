@@ -50,9 +50,24 @@ Si potrebbe anche pensare di integrare della API REST per poter rendere accessib
     - stato ram
     - stato spazio di archiviazione
     - log degli errori
+    - la possibilità di riavviare l'app (utile quando si cambiano determinate impostazioni tipo le impostazioni di connessione del plc)
 
 ### Optional da implementare nella connessione con PLC
 - tentativi di riconnessione nel caso si scolleghi durante la lettura
 - scrittura dei dati nel plc
 - lettura dei dati a batch dai db
 - lettura di dati al di fuori dei db
+
+# Struttura logica dell'app:
+l'app è divisa in 3 sezioni:
+- Main loop che gestisce l'orchestrazione, e la lettura/scrittura file
+- Una go routine per la gestione dell'interfaccia web
+- Una go routine per la lettura delle tag aggiornate dal PLC
+
+appena l'app parte il main carica la configurazione dell'app, crea il client plc e si connette.
+poi lancia la go routine per la gestione della UI web.
+poi lancia la go routine per la gestione della lettura periodica dei dati da plc.
+Poi parte il main loop che ha il compito di creare i log e farli ruotare.
+
+Al centro dell'app c'è la struttura dati di plcComunitacion con i valori aggiornati di tutte le tag. Le varie sezioni di programma accedono in sola lettura a questa struttura mediante metodi dedicati, non lavorano mai su puntatori alla struttura ma solo su copie di essa.
+Questo permette alle varie sezione di app di lavorare in parallelo senza problemi.
