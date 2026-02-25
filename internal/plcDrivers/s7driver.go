@@ -2,6 +2,7 @@ package plcdrivers
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/chiaf1/plclogger/internal/domain"
@@ -16,6 +17,9 @@ type S7Client struct {
 
 	handler *gos7.TCPClientHandler
 	client  gos7.Client
+
+	mu        sync.Mutex
+	connected bool
 }
 
 // NewS7Client creates a new driver
@@ -37,31 +41,78 @@ func NewS7Client(conf domain.ConnectionConfig) *S7Client {
 	}
 }
 
-// Connect opens the connection to the client
+// Connect opens the connection thread safe
 func (s7 *S7Client) Connect() error {
+	s7.mu.Lock()
+	defer s7.mu.Unlock()
+
+	if s7.connected {
+		return nil // already connected
+	}
+
 	if err := s7.handler.Connect(); err != nil {
 		return fmt.Errorf("S7 connect failed (ip=%s rack=%v slot=%v): %w", s7.ip, s7.rack, s7.slot, err)
 	}
 	// after the connection let's create the client that will use this handler
 	s7.client = gos7.NewClient(s7.handler)
+
+	s7.connected = true
 	return nil
 }
 
 // Disconnect closes the connection to the client, gos7 doesn't returns errors on closing
 // but to keep the interface it will return nil always
 func (s7 *S7Client) Disconnect() error {
-	if s7.handler != nil {
+	s7.mu.Lock()
+	defer s7.mu.Unlock()
+
+	if s7.connected && s7.handler != nil {
 		s7.handler.Close()
 	}
 	s7.client = nil
+	s7.connected = false
 	return nil
 }
 
-// Read connects to the plc and reads the current value of the tag
+// Read connects to the plc and reads the current value of the tag, if it loses connection it retrys 2 times with a time out in between
 func (s7 *S7Client) Read(tag domain.PlcTag) (any, error) {
-	if s7.client == nil {
-		return nil, fmt.Errorf("S7 client not connected")
+	const maxAttempts = 2
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		// check connection
+		if err := s7.Connect(); err != nil {
+			if attempt == maxAttempts {
+				return nil, fmt.Errorf("PLC connection failed: %w", err)
+			}
+			time.Sleep(200 * time.Millisecond)
+			continue
+		}
+
+		// read attempt
+		val, err := s7.readOnce(tag)
+		if err == nil {
+			return val, nil
+		}
+
+		// if it fails we try to reconnect
+		s7.Disconnect()
+
+		if attempt == maxAttempts {
+			return nil, fmt.Errorf("read failed after max attempts: %w", err)
+		}
+
+		time.Sleep(200 * time.Millisecond)
 	}
+
+	return nil, fmt.Errorf("unexpected read failure")
+}
+
+// readOnce reads from a db the single tag in the argument
+func (s7 *S7Client) readOnce(tag domain.PlcTag) (any, error) {
+	// I make a copy of the pointer to the s7Client so I can work on it in parallel with other functions
+	s7.mu.Lock()
+	client := s7.client
+	s7.mu.Unlock()
 
 	// Calculate how many bytes are needed
 	sz, err := requiredSizeBytes(tag)
@@ -72,7 +123,7 @@ func (s7 *S7Client) Read(tag domain.PlcTag) (any, error) {
 	buf := make([]byte, sz)
 
 	// Reading from DB
-	err = s7.client.AGReadDB(tag.S7.DBNumber, tag.S7.Offset, sz, buf)
+	err = client.AGReadDB(tag.S7.DBNumber, tag.S7.Offset, sz, buf)
 	if err != nil {
 		return nil, fmt.Errorf("error reading from (DB=%v offset=%v, size=%v): %w", tag.S7.DBNumber, tag.S7.Offset, sz, err)
 	}
