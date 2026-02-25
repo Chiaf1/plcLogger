@@ -40,7 +40,7 @@ func (rv *ReadValues) StartPolling(ctx context.Context, plc domain.PLCDriver, in
 
 // StartPoller creates an internal context adn starts StartPolling in a go routine
 // it protects over starting multiple pollers, if the poller already started it returns false
-func (rv *ReadValues) StartPoller(plc domain.PLCDriver, interval time.Duration, logf func(string, ...any)) bool {
+func (rv *ReadValues) StartPoller(parent context.Context, plc domain.PLCDriver, interval time.Duration, logf func(string, ...any)) bool {
 	rv.pollerMu.Lock()
 	defer rv.pollerMu.Unlock()
 
@@ -49,7 +49,7 @@ func (rv *ReadValues) StartPoller(plc domain.PLCDriver, interval time.Duration, 
 	}
 
 	// shutdown context StopPoller or parent ctx
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(parent)
 	rv.cancelPoll = cancel
 	rv.polling = true
 

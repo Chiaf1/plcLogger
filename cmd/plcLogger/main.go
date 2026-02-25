@@ -1,11 +1,33 @@
 package main
 
+import (
+	"context"
+	"os"
+	"os/signal"
+	"syscall"
+)
+
 const CONFIG_PATH = "./config.yaml"
 const LAST_VALUES_PATH = "./data/last_values.json"
 const ON_CHANGE_LOG_PATH = "./log/onChange.log"
 const PERIODIC_LOG_PATH = "./log/periodic.log"
 
+func setupSignalHandler(cancel context.CancelFunc) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		cancel()
+	}()
+}
+
 func main() {
+	// Creating the parent context for all the routines
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	setupSignalHandler(cancel)
+
+	<-ctx.Done()
 	/*
 		//loading config
 		var conf config.Config
