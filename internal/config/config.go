@@ -48,6 +48,18 @@ func (c *Config) SetDefault() {
 	c.App.OnChangeClock = 30 * time.Second
 	c.App.EnableWebServer = true
 	c.App.EnableOnChangeLog = true
+	c.App.PeriodicLog = domain.LogConf{
+		MaxSize:        5 * 1024 * 1024,
+		MaxAge:         0,
+		ArchivePath:    "./log/archive/periodic",
+		ArchiveMaxSize: 100 * 1024 * 1024,
+	}
+	c.App.OnChangeLog = domain.LogConf{
+		MaxSize:        5 * 1024 * 1024,
+		MaxAge:         0,
+		ArchivePath:    "./log/archive/onChange",
+		ArchiveMaxSize: 100 * 1024 * 1024,
+	}
 
 	c.DataToLog = []domain.Tag{
 		{

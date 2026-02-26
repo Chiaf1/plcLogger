@@ -96,7 +96,17 @@ func main() {
 				log.Printf("periodic log error: %v", err)
 			}
 
-			// add control on log file rotation
+			// Check log file rotatio and archive
+			err = logger.CheckArchiveRotation(
+				PERIODIC_LOG_PATH,
+				conf.App.PeriodicLog.MaxSize,
+				conf.App.PeriodicLog.MaxAge,
+				conf.App.PeriodicLog.ArchivePath,
+				conf.App.PeriodicLog.ArchiveMaxSize,
+			)
+			if err != nil {
+				log.Printf("erro rotating periodic log file: %v", err)
+			}
 
 			select {
 			case <-ctx.Done():
@@ -129,7 +139,18 @@ func main() {
 				if err != nil {
 					log.Printf("onChange log error: %v", err)
 				}
-				// add controll on log file rotation
+
+				// Check log file rotatio and archive
+				err = logger.CheckArchiveRotation(
+					ON_CHANGE_LOG_PATH,
+					conf.App.OnChangeLog.MaxSize,
+					conf.App.OnChangeLog.MaxAge,
+					conf.App.OnChangeLog.ArchivePath,
+					conf.App.OnChangeLog.ArchiveMaxSize,
+				)
+				if err != nil {
+					log.Printf("erro rotating OnChange log file: %v", err)
+				}
 
 				select {
 				case <-ctx.Done():

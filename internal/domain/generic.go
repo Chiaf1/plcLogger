@@ -24,6 +24,8 @@ type AppConfig struct {
 	OnChangeClock       time.Duration `yaml:"onChangeClock"`
 	EnableWebServer     bool          `yaml:"enableWebServer"`
 	EnableOnChangeLog   bool          `yaml:"enableOnChangeLog"`
+	PeriodicLog         LogConf       `yaml:"periodicLog"`
+	OnChangeLog         LogConf       `yaml:"onChangeLog"`
 }
 
 // Tag defines all data related to one tag
@@ -61,3 +63,11 @@ const (
 	PlcTime     PlcType = "time"
 	PlcString   PlcType = "string"
 )
+
+// Configs for log file rotation and archive
+type LogConf struct {
+	MaxSize        int64         `yaml:"maxSize"`
+	MaxAge         time.Duration `yaml:"maxAge"`
+	ArchivePath    string        `yaml:"archivePath"`
+	ArchiveMaxSize int64         `yaml:"archiveMaxSize"`
+}
