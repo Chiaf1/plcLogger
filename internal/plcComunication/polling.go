@@ -32,7 +32,7 @@ func (rv *ReadValues) StartPolling(ctx context.Context, plc domain.PLCDriver, in
 			// periodic tag update
 			if err := rv.UpdateCurrentVals(plc); err != nil && logf != nil {
 				// the loop doesn't stop but we log the error
-				logf("plc read waring: %v", err)
+				logf("plc read warning: %v", err)
 			}
 		}
 	}

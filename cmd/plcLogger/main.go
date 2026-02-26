@@ -49,7 +49,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error loading last values: %v", err)
 	}
-	log.Println("Last values loaded successfolly")
+	log.Println("Last values loaded successfully")
 
 	// Creating new plc driver
 	plc, err := plcdrivers.NewPLCDriver(conf.Connection)
@@ -73,8 +73,6 @@ func main() {
 		// at the moment not present yet
 		// go startWebServer(ctx, rv)
 	}
-
-	time.Sleep(5 * time.Second) // sleep 5s so that the poller has time to updated the values before the logger start to read them
 
 	// Start periodic logger
 	go func() {
@@ -105,7 +103,7 @@ func main() {
 				conf.App.PeriodicLog.ArchiveMaxSize,
 			)
 			if err != nil {
-				log.Printf("erro rotating periodic log file: %v", err)
+				log.Printf("error rotating periodic log file: %v", err)
 			}
 
 			select {
@@ -149,7 +147,7 @@ func main() {
 					conf.App.OnChangeLog.ArchiveMaxSize,
 				)
 				if err != nil {
-					log.Printf("erro rotating OnChange log file: %v", err)
+					log.Printf("error rotating OnChange log file: %v", err)
 				}
 
 				select {
