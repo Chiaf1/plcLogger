@@ -10,6 +10,16 @@ app:
   onChangeClock: 30s
   enableWebServer: true
   enableOnChangeLog: true 
+  periodicLog:
+    maxSize: 5242880 #5MB
+    maxAge: 0
+    archivePath: "./log/archive/periodic"
+    archiveMaxSize: 104857600 #100MB
+  onChangeLog:
+    maxSize: 5242880 #5MB
+    maxAge: 0
+    archivePath: "./log/archive/onChange"
+    archiveMaxSize: 104857600 #100MB
 dataToLog:
   - name: Tag1
     type: bool
