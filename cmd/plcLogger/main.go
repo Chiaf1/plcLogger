@@ -2,9 +2,17 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
+
+	"github.com/chiaf1/plclogger/internal/config"
+	datastorage "github.com/chiaf1/plclogger/internal/dataStorage"
+	"github.com/chiaf1/plclogger/internal/logger"
+	plccomunication "github.com/chiaf1/plclogger/internal/plcComunication"
+	plcdrivers "github.com/chiaf1/plclogger/internal/plcDrivers"
 )
 
 const CONFIG_PATH = "./config.yaml"
@@ -27,34 +35,114 @@ func main() {
 	defer cancel()
 	setupSignalHandler(cancel)
 
+	// Loading config from file or creating one if not present
+	var conf config.Config
+	err := conf.Load(CONFIG_PATH)
+	if err != nil {
+		log.Fatalf("error loading config: %v", err)
+	}
+	log.Println("config loaded successfully")
+
+	// Load last values
+	var lv datastorage.LastValues
+	err = lv.LoadLastValues(LAST_VALUES_PATH)
+	if err != nil {
+		log.Fatalf("error loading last values: %v", err)
+	}
+	log.Println("Last values loaded successfolly")
+
+	// Creating new plc driver
+	plc, err := plcdrivers.NewPLCDriver(conf.Connection)
+	if err != nil {
+		log.Fatalf("error creating the PLC comunication driver: %v", err)
+	}
+
+	// Creating ReadValues
+	rv := plccomunication.NewReadValues()
+	rv.ReplaceAllTags(conf.DataToLog) // Load all tags
+
+	// Start PLC comunication
+	plc.Connect()
+	defer plc.Disconnect()
+
+	// Start plc polling
+	rv.StartPoller(ctx, plc, conf.App.OnChangeClock, log.Printf)
+
+	// Start web server
+	if conf.App.EnableWebServer {
+		// at the moment not present yet
+		// go startWebServer(ctx, rv)
+	}
+
+	time.Sleep(5 * time.Second) // sleep 5s so that the poller has time to updated the values before the logger start to read them
+
+	// Start periodic logger
+	go func() {
+		// start ticker for periodic interval
+		ticker := time.NewTicker(conf.App.PeriodicLogInterval)
+		defer ticker.Stop()
+
+		// Logging loop
+		for {
+			snap := rv.SnapShot()
+			cv := make(logger.CurrentValues)
+			for _, t := range snap {
+				if t.PeriodicLog {
+					cv[t.Name] = t.Val
+				}
+			}
+			err := logger.LogPeriodic(cv, PERIODIC_LOG_PATH)
+			if err != nil {
+				log.Printf("periodic log error: %v", err)
+			}
+
+			// add control on log file rotation
+
+			select {
+			case <-ctx.Done():
+				// shutdown
+				return
+			case <-ticker.C:
+				// Restart loop
+				continue
+			}
+		}
+	}()
+
+	// Start onChange logger
+	if conf.App.EnableOnChangeLog {
+		go func() {
+			// Start ticker
+			ticker := time.NewTicker(conf.App.OnChangeClock)
+			defer ticker.Stop()
+
+			// Logging loop
+			for {
+				snap := rv.SnapShot()
+				cv := make(logger.CurrentValues)
+				for _, t := range snap {
+					if t.OnChangeLog {
+						cv[t.Name] = t.Val
+					}
+				}
+				logger.CheckChangedValues(lv, cv, LAST_VALUES_PATH, ON_CHANGE_LOG_PATH)
+
+				// add error management
+				// add controll on log file rotation
+
+				select {
+				case <-ctx.Done():
+					//Shutdown
+					return
+				case <-ticker.C:
+					// Restart loop
+					continue
+				}
+			}
+		}()
+	}
+
+	// Wait for stop singal from system
 	<-ctx.Done()
-	/*
-		//loading config
-		var conf config.Config
-		err := conf.Load(CONFIG_PATH)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println("Config loaded")
 
-		//loading last values
-		var lv datastorage.LastValues
-		err = lv.LoadLastValues(LAST_VALUES_PATH)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println("Last values loaded")
-
-		//retreving the current values and checking if they changed
-		var rv plccomunication.ReadValues
-		err = rv.UpdateCurrentVals(conf.DataToLog, conf.Connection)
-		if err != nil {
-			log.Fatal(err)
-		}
-		logger.CheckChangedValues(lv, rv.GetOnChange(), LAST_VALUES_PATH, ON_CHANGE_LOG_PATH)
-		log.Println("OnChange logged")
-
-		logger.LogPeriodic(rv.GetPeriodic(), PERIODIC_LOG_PATH)
-		log.Println("Periodic logged")
-	*/
 }

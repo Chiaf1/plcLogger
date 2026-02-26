@@ -31,7 +31,7 @@ type LogOnChangeType struct {
 // CheckChangedValues this function ranges over the current values and compares them to the LastValues, if the new ones are different
 // or the LastValues don't have them stored it logs the difference and updates the LastValues. Once it has ranged over all the values
 // it saves the LastValues to file
-func CheckChangedValues(lv datastorage.LastValues, cv CurrentValues, pathLv string, pathLog string) {
+func CheckChangedValues(lv datastorage.LastValues, cv CurrentValues, pathLastVal string, pathLog string) {
 	changed := false
 	//if the list of old values is empty i create it
 	if lv == nil {
@@ -54,7 +54,7 @@ func CheckChangedValues(lv datastorage.LastValues, cv CurrentValues, pathLv stri
 	}
 	// it saves the last value file if something changed
 	if changed {
-		lv.SaveLastValues(pathLv)
+		lv.SaveLastValues(pathLastVal)
 	}
 }
 
