@@ -125,9 +125,10 @@ func main() {
 						cv[t.Name] = t.Val
 					}
 				}
-				logger.CheckChangedValues(lv, cv, LAST_VALUES_PATH, ON_CHANGE_LOG_PATH)
-
-				// add error management
+				err := logger.CheckChangedValues(lv, cv, LAST_VALUES_PATH, ON_CHANGE_LOG_PATH)
+				if err != nil {
+					log.Printf("onChange log error: %v", err)
+				}
 				// add controll on log file rotation
 
 				select {

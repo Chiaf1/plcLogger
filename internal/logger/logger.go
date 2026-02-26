@@ -31,31 +31,58 @@ type LogOnChangeType struct {
 // CheckChangedValues this function ranges over the current values and compares them to the LastValues, if the new ones are different
 // or the LastValues don't have them stored it logs the difference and updates the LastValues. Once it has ranged over all the values
 // it saves the LastValues to file
-func CheckChangedValues(lv datastorage.LastValues, cv CurrentValues, pathLastVal string, pathLog string) {
+// returns an error that embeds all errors accured during logging
+func CheckChangedValues(lv datastorage.LastValues, cv CurrentValues, pathLastVal string, pathLog string) error {
 	changed := false
 	//if the list of old values is empty i create it
 	if lv == nil {
 		lv = make(datastorage.LastValues)
 	}
+	var errs []error
 	for k, curVal := range cv {
+		// Skip the log if the current value is nil (hasent been read yet)
+		if curVal == nil {
+			continue
+		}
 		last, exists := lv[k]
 		//it checks if the key exist in the old values, if it doesn't it adds and logs it
 		if !exists {
-			LogOnChange(pathLog, k, nil, curVal)
-			lv.SetValue(k, curVal)
+			err := LogOnChange(pathLog, k, nil, curVal)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("error while logging %s: %w", k, err))
+			}
+			err = lv.SetValue(k, curVal)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("error setting the last value %v of key %s: %w", curVal, k, err))
+			}
 			changed = true
 			continue
 		}
 		if !SmartEqual(last.Val, curVal) {
-			LogOnChange(pathLog, k, last.Val, curVal)
-			lv.SetValue(k, curVal)
+			err := LogOnChange(pathLog, k, last.Val, curVal)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("error while logging %s: %w", k, err))
+			}
+			err = lv.SetValue(k, curVal)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("error setting the last value %v of key %s: %w", curVal, k, err))
+			}
 			changed = true
 		}
 	}
 	// it saves the last value file if something changed
 	if changed {
-		lv.SaveLastValues(pathLastVal)
+		err := lv.SaveLastValues(pathLastVal)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("error saving last values: %w", err))
+		}
 	}
+
+	// returning errors
+	if len(errs) > 0 {
+		return fmt.Errorf("%v errors accured during onChange loggin: %d", len(errs), errs)
+	}
+	return nil
 }
 
 // LogOnChange creates the json format of the data to log and passes it to AppendToLogFile to actually log it.
