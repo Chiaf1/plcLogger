@@ -188,15 +188,16 @@ func LogPeriodic(cv CurrentValues, path string) error {
 
 // RotateLogFileIfeNeeded this fuction checks the stats of the log file to see if exceeds certain values
 // if it does it then renames the file with a time stamp and moves it to a new directory
-func RotateLogFileIfNeeded(logFile string, maxSize int64, maxAge time.Duration, archiveDir string) error {
+// Returns true if the rotation happened, false if not
+func RotateLogFileIfNeeded(logFile string, maxSize int64, maxAge time.Duration, archiveDir string) (bool, error) {
 	// retreving the file stats
 	info, err := os.Stat(logFile)
 	if err != nil {
 		if os.IsNotExist(err) {
 			// if the file doesn't exist it doesn't need to be rotated
-			return nil
+			return false, nil
 		}
-		return fmt.Errorf("error reading log file info: %w", err)
+		return false, fmt.Errorf("error reading log file info: %w", err)
 	}
 
 	needRotate := false
@@ -215,12 +216,12 @@ func RotateLogFileIfNeeded(logFile string, maxSize int64, maxAge time.Duration, 
 	}
 
 	if !needRotate {
-		return nil
+		return false, nil
 	}
 
 	// first let's create the directory if it already exists nothing happens
 	if err := os.MkdirAll(archiveDir, 0755); err != nil {
-		return fmt.Errorf("cannot create directory: %w", err)
+		return false, fmt.Errorf("cannot create directory: %w", err)
 	}
 
 	// new file name creation, format: baseName_date_time.ext
@@ -235,17 +236,17 @@ func RotateLogFileIfNeeded(logFile string, maxSize int64, maxAge time.Duration, 
 	if FileExists(newPath) {
 		incrementedName, err := IncrementFileName(newPath)
 		if err != nil {
-			return fmt.Errorf("error while searching for a new name: %w", err)
+			return false, fmt.Errorf("error while searching for a new name: %w", err)
 		}
 		newPath = incrementedName
 	}
 	// renaming the file
 	err = os.Rename(logFile, newPath)
 	if err != nil {
-		return fmt.Errorf("error renaming the file: %w", err)
+		return false, fmt.Errorf("error renaming the file: %w", err)
 	}
 
-	return nil
+	return true, nil
 }
 
 // FileExists checks if file already exists
@@ -378,9 +379,14 @@ func RemoveExcessArchive(path string, maxSize int64) error {
 // if the archive exceeds the set dimension
 func CheckArchiveRotation(logFile string, maxSize int64, maxAge time.Duration, archivePath string, maxArchiveSize int64) error {
 	// First checks if the log file needs to be rotated
-	err := RotateLogFileIfNeeded(logFile, maxSize, maxAge, archivePath)
+	rotated, err := RotateLogFileIfNeeded(logFile, maxSize, maxAge, archivePath)
 	if err != nil {
 		return fmt.Errorf("error rotating log file: %w", err)
+	}
+
+	// if the rotation didn't happen is not needed to check the archive
+	if !rotated {
+		return nil
 	}
 
 	// then checks the archive directory
