@@ -31,6 +31,7 @@ Si potrebbe anche pensare di integrare della API REST per poter rendere accessib
  - [X] Rotazione file di log se dimensione troppo grande e controllo dimensione archivio per mantenere dimensioni impostate
  - [ ] Lettura valori attivi da PLC {Protocollo S7 con GOS7 o OPCUA}
  - [ ] Creazione interfaccia web essenziale {framework GIN + GO templates + HTMX}
+ - [ ] Dall'interfaccia web si deve poter aggiornare il file di config e salvarlo, aggiungendo o togliendo tag da loggare
  - [ ] Integrazione gestion archivio file da interfaccia web con possibilità di scaricare i file e cancellarli
  - [ ] Integrazione API REST per recupero dati attivi e storico
 
